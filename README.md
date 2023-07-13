@@ -33,7 +33,7 @@ Genera una key AES-128 de acuerdo al identificador del CSP y la key la almacena 
 ```c++
 CryptEncrypt(nazuna.hkey, 0, true, 0, buf, &bytes_leer, BUF_LEN);
 ```
-Cifra los datos de acuerdo al CSP, ```buf``` es un puntero al buffer datos que contiene los datos que se van a cifrar, ```bytes_leer``` es la cantidad de bytes que se van a cifrar, que son los bytes del archivo original, esta funcion tambien funcionara para que el buffer cifrado se sobreescriba por el original 
+Cifra los datos de acuerdo al CSP, ```buf``` es un puntero al buffer datos que contiene los datos que se van a cifrar, ```bytes_leer``` es la cantidad de bytes que se van a cifrar, que son los bytes del archivo original, este buffer cifrado se sobreescribira por el original con unas funciones más adelante
 
 ### Modificaciones
 
