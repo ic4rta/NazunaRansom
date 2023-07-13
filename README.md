@@ -1,7 +1,7 @@
 # NazunaRansom
 Nazuna Ransomware v1, es un ransomware inspirado en mi waifu (Nazuna)
 
-### Caracteristicas version 1
+### Caracteristicas
 
 - Usa cifrado AES-128 en modo CBC
 - Cierra la sesion del usuario
