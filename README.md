@@ -1,7 +1,7 @@
 # NazunaRansom
 Nazuna Ransomware v1 es un ransomware inspirado en mi waifu (Nazuna)
 
-### Caracteristica
+### Caracteristicas
 
 - Usa cifrado AES-128 en modo CBC
 - Cierra la sesion del usuario
@@ -56,3 +56,5 @@ Yo lo compile desde GNU/Linux con el comando
 ```bash
 x86_64-w64-mingw32-g++ -o NazunaRansom NazunaRansom.cpp -lbcrypt -static -static-libgcc -static-libstdc++ -lurlmon
 ```
+
+![](https://preview.redd.it/ucmd1fimkara1.gif?s=ed9fe85829076490d61b12abd57ce30368ce5227)
