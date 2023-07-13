@@ -50,7 +50,7 @@ string ruta = filesystem::path(string(getenv("USERPROFILE")) + "\\Desktop").stri
 ```
 Solo modifica ```Desktop``` por otra, ej: ```Documents```
 
-### CompiladO
+### Compilado
 Yo lo compile desde GNU/Linux con el comando
 
 ```bash
