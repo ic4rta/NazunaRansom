@@ -37,7 +37,7 @@ Cifra los datos de acuerdo al CSP, ```buf``` es un puntero al buffer datos que c
 
 ### Modificaciones
 
-Dentro de la funcion ```recorrer_dir``` puedes especificar las extensiones que quieres que se cifren:
+Dentro de la funcion ```recorrer_dir``` puedes especificar las extensiones de los archivos que quieres que se cifren:
 
 ```c++
 if (extension == ".txt" || extension == ".cpp" || extension == ".pdf" || extension == ".docx" || extension == ".xlsx")
