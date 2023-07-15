@@ -42,7 +42,7 @@ Cifra los datos de acuerdo al CSP, ```buf``` es un puntero al buffer datos que c
 
 ### Funcion recorrer_dir
 
-Las funciones ```FindFirstFile``` y ```FindNextFile``` se usan para recorrer el directorios y subdirectorios desde la ruta almacenada en ```ruta_encriptar```, el segundo if verifica si ```ruta_data``` es un directorio mediante el AND y ```FILE_ATTRIBUTE_DIRECTORY```, el tercer if usando ```strcmp``` se compara ```ruta_data.cFileName``` con ```.``` y ```..``` para ver si ```ruta_data``` se refiere al directorio actual(.) o al directorio padre(..), si es diferente de 0 y se cumple la condicion anterior, se crea una variable llamada ```subruta_recorrer``` la cual representa la ruta del subdirectorio que se va a recorrer y la agrega a ```subdirectorios```.
+Las funciones ```FindFirstFile``` y ```FindNextFile``` se usan para recorrer el directorios y subdirectorios desde la ruta almacenada en ```ruta_encriptar```, el segundo if verifica si ```ruta_data``` es un directorio mediante el AND y ```FILE_ATTRIBUTE_DIRECTORY```, el tercer if usando ```strcmp``` se compara ```ruta_data.cFileName``` con ```.``` y ```..``` para ver si ```ruta_data``` se refiere al directorio actual(.) o al directorio padre(..), si es diferente de 0(que no corresponde a ninguno de los dos) y se cumple la condicion anterior, se crea una variable llamada ```subruta_recorrer``` la cual representa la ruta del subdirectorio que se va a recorrer y la agrega a ```subdirectorios```.
 
 El penultimo if representa las extensiones y hace un ```OR``` entre todas las extensiones, si encuentra una extension entrara al ultimo if el cual verifica si ```cifrar_archivos``` regresa ```true```, y en caso de que si, cambia la extension del archivo a .Nazuna y lo renombra con esa extension
 
