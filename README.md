@@ -1,5 +1,5 @@
 # NazunaRansom
-Nazuna Ransomware, es un ransomware inspirado en mi waifu (Nazuna)
+NazunaRansom, es un ransomware inspirado en mi waifu (Nazuna)
 
 ### Caracteristicas
 
